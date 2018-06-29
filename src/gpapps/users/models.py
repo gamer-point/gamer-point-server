@@ -9,7 +9,7 @@ class UserManager(BaseUserManager):
     Tells Django to work with our custom user model.
     """
     
-    def create_user(self, email, first_name, last_name, password=None):
+    def create_user(self, username, email, first_name, last_name, password=None):
         """
         Create a new user object
         :param email: the email
@@ -22,14 +22,13 @@ class UserManager(BaseUserManager):
             raise ValueError('User must have an email')
         
         email = self.normalize_email(email)
-        user = self.model(email=email, first_name=first_name, last_name=last_name)
         
+        user = self.model(username=username, email=email, first_name=first_name, last_name=last_name)
         user.set_password(password)
         user.save(using=self._db)
-        
         return user
     
-    def create_superuser(self, email, first_name, last_name, password=None):
+    def create_superuser(self, username, email, first_name, last_name, password):
         """
         Create a new super user
         :param email: the email
@@ -39,12 +38,11 @@ class UserManager(BaseUserManager):
         :return: user object
         """
         
-        user = self.create_user(email, first_name, last_name, password)
+        user = self.create_user(username, email, first_name, last_name, password)
         user.is_superuser = True
         user.is_staff = True
         
         user.save(using=self._db)
-        
         return user
 
 
@@ -76,8 +74,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     """
     A list of fields required when creating an user via `createsuperuser`
+    USERNAME_FIELD and password are already required
     """
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'password']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
     
     def get_full_name(self):
         """
