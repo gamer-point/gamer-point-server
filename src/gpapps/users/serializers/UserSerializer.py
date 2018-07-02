@@ -3,6 +3,7 @@ from rest_framework.serializers import ValidationError
 
 from ..models.User import User
 
+
 class UserSerializer(ModelSerializer):
     """
     The serializer for User Objects
@@ -16,8 +17,8 @@ class UserSerializer(ModelSerializer):
                 'write_only': True
             }
         }
-        
-    def validate_username(selfs, value):
+    
+    def validate_username(self, value):
         """
         Check if the username is unique case insensitive
         :param value: the username
@@ -27,8 +28,8 @@ class UserSerializer(ModelSerializer):
         if user is not None:
             raise ValidationError("Username must be unique")
         return value
-
-    def validate_email(selfs, value):
+    
+    def validate_email(self, value):
         """
         Check if the email is unique case insensitive AND if the email is already verified.
         When a new user is created, the is_email_verified is False. Then when the user verifies its email,
@@ -41,7 +42,55 @@ class UserSerializer(ModelSerializer):
             raise ValidationError("email already registered")
         return value
     
-    
+    def validate_password(self, value):
+        """
+        Password validation:
+        - at least 8 characters
+        - at least 1 letter
+        - at least 1 UPPERCASE
+        - at least 1 digit
+        - at least 1 special character
+        - no spaces allowed
+        :param value: the password
+        :return:
+        """
+        
+        if len(value) < 8:
+            raise ValidationError("Password must have at least 8 characters")
+        
+        uppercase = 0
+        lowercase = 0
+        letters = 0
+        digits = 0
+        specials = 0
+        spaces = 0
+        
+        for character in value:
+            if character.isupper():
+                uppercase += 1
+                letters += 1
+            elif character.islower():
+                lowercase += 1
+                letters += 1
+            elif character.isdigit():
+                digits += 1
+            elif character.isspace():
+                spaces += 1
+            else:
+                specials += 1
+                
+        if letters == 0:
+            raise ValidationError("Password must have at least 1 letter")
+        if uppercase == 0:
+            raise ValidationError("Password must have at least 1 UPPERCASE letter")
+        if digits == 0:
+            raise ValidationError("Password must have at least 1 digit")
+        if specials == 0:
+            raise ValidationError("Password must have at least 1 special character")
+        if spaces > 0:
+            raise ValidationError("Password can not have spaces")
+            
+        return value
     
     def create(self, validated_data):
         """
