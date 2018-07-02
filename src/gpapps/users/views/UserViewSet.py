@@ -1,5 +1,7 @@
 from rest_framework import filters
-from rest_framework import viewsets
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+
 from rest_framework.authentication import TokenAuthentication
 
 from ..models.User import User
@@ -7,9 +9,14 @@ from ..permissions.UpdateOwnUser import UpdateOwnUser
 from ..serializers.UserSerializer import UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin,
+                  UpdateModelMixin, GenericViewSet):
     """
-    Handles create and update Users
+    Handles:
+    creating an User - Sign Up
+    Retrieve a list of users
+    Retrieve a specific User
+    Update an User
     """
     
     serializer_class = UserSerializer
@@ -18,3 +25,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (UpdateOwnUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('first_name', 'last_name', 'email', 'username')
+
+
+

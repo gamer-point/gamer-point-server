@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ValidationError
 
 from ..models.User import User
 
@@ -15,6 +16,32 @@ class UserSerializer(ModelSerializer):
                 'write_only': True
             }
         }
+        
+    def validate_username(selfs, value):
+        """
+        Check if the username is unique case insensitive
+        :param value: the username
+        :return:
+        """
+        user = User.objects.filter(username__iexact=value).first()
+        if user is not None:
+            raise ValidationError("Username must be unique")
+        return value
+
+    def validate_email(selfs, value):
+        """
+        Check if the email is unique case insensitive AND if the email is already verified.
+        When a new user is created, the is_email_verified is False. Then when the user verifies its email,
+        we delete every user with its email and is_email_verified is False
+        :param value: the username
+        :return:
+        """
+        user = User.objects.filter(email__iexact=value, is_email_verified=True).first()
+        if user is not None:
+            raise ValidationError("email already registered")
+        return value
+    
+    
     
     def create(self, validated_data):
         """

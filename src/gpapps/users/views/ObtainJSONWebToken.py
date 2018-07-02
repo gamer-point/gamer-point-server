@@ -19,15 +19,25 @@ class ObtainJSONWebToken(JSONWebTokenAPIView):
         
         if serializer.is_valid():
             user = serializer.object.get('user')
-            
+
+            token = None
             if user.is_tfa_enabled == True:
+                """
+                Do not return a valid token
+                Send the TFA code then returns that requires the two factor authentication
+                """
+                # TODO: send the TFA code
                 response_data = {
-                    'token': None,
+                    'token': token,
                     "require": 'two_factor_authentication'
                 }
-            elif not user.is_email_verified:
+            elif user.is_email_verified:
+                """
+                Do not return a valid token
+                Returns that requires a email verification on response
+                """
                 response_data = {
-                    'token': None,
+                    'token': token,
                     "require": 'verify_email'
                 }
             else:
