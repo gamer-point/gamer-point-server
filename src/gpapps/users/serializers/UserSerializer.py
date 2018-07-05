@@ -52,7 +52,7 @@ class UserSerializer(ModelSerializer):
         - at least 1 special character
         - no spaces allowed
         :param value: the password
-        :return:
+        :return: the password
         """
         
         if len(value) < 8:
